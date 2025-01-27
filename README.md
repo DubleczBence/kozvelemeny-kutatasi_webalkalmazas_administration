@@ -1,1 +1,1 @@
-# kozvelemeny-kutatasi_webalkalmaz-s_administration
+# kozvelemeny-kutatasi_webalkalmazas_administration
