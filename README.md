@@ -1,1 +1,1 @@
-# k-zv-lem-ny-kutat-si_webalkalmaz-s_administration
+# kozvelemeny-kutatasi_webalkalmaz-s_administration
