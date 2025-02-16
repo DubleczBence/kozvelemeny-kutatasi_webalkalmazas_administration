@@ -112,6 +112,73 @@ app.delete('/api/companies/:id', (req, res) => {
 });
 
 
+
+app.get('/api/users-responses', (req, res) => {
+    db.all('SELECT * FROM users_responses', [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
+});
+
+app.post('/api/users-responses', (req, res) => {
+    const { user_id, korcsoport, vegzettseg, regio, nem, anyagi_helyzet } = req.body;
+    
+    db.run(`INSERT INTO users_responses (user_id, korcsoport, vegzettseg, regio, nem, anyagi_helyzet) 
+            VALUES (?, ?, ?, ?, ?, ?)`,
+        [user_id, korcsoport, vegzettseg, regio, nem, anyagi_helyzet],
+        function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ id: this.lastID, ...req.body });
+        });
+});
+
+
+app.post('/api/survey-set', (req, res) => {
+    const { title, description, ceg_id, start_date, end_date } = req.body;
+    
+    db.run(`INSERT INTO survey_set (title, description, ceg_id, start_date, end_date) 
+            VALUES (?, ?, ?, ?, ?)`,
+        [title, description, ceg_id, start_date, end_date],
+        function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ id: this.lastID, ...req.body });
+        });
+});
+
+
+app.get('/api/questions', (req, res) => {
+    db.all('SELECT * FROM questions', [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
+});
+
+app.post('/api/questions', (req, res) => {
+    const { question, frm_option, type, order_by, survey_id } = req.body;
+    
+    db.run(`INSERT INTO questions (question, frm_option, type, order_by, survey_id) 
+            VALUES (?, ?, ?, ?, ?)`,
+        [question, frm_option, type, order_by, survey_id],
+        function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ id: this.lastID, ...req.body });
+        });
+});
+
+
+app.post('/api/answers', (req, res) => {
+    const { survey_id, user_id, answer, question_id } = req.body;
+    
+    db.run(`INSERT INTO answers (survey_id, user_id, answer, question_id) 
+            VALUES (?, ?, ?, ?)`,
+        [survey_id, user_id, answer, question_id],
+        function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ id: this.lastID, ...req.body });
+        });
+});
+
+
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
