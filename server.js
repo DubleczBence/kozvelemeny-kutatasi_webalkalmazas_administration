@@ -11,7 +11,10 @@ app.use(express.json());
 
 app.post('/api/users', (req, res) => {
     const { error } = userValidation(req.body);
-    if (error) return res.status(400).json({ message: error.details[0].message });
+    if (error) {
+        const errorMessages = error.details.map(detail => detail.message);
+        return res.status(400).json({ message: errorMessages.join(', ') });
+    }
 
     const { name, email, password } = req.body;
     db.run('INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
@@ -24,7 +27,10 @@ app.post('/api/users', (req, res) => {
 
 app.post('/api/companies', (req, res) => {
     const { error } = companyValidation(req.body);
-    if (error) return res.status(400).json({ message: error.details[0].message });
+    if (error) {
+        const errorMessages = error.details.map(detail => detail.message);
+        return res.status(400).json({ message: errorMessages.join(', ') });
+    }
 
     const { cegnev, telefon, ceg_email, jelszo, telepules, megye, 
             ceges_szamla, hitelkartya, adoszam, cegjegyzek, helyrajziszam } = req.body;
@@ -56,8 +62,12 @@ app.get('/api/companies', (req, res) => {
 
 
 app.put('/api/users/:id', (req, res) => {
+    const id = req.params.id;
     const { error } = userValidation(req.body);
-    if (error) return res.status(400).json({ message: error.details[0].message });
+    if (error) {
+        const errorMessages = error.details.map(detail => detail.message);
+        return res.status(400).json({ message: errorMessages.join(', ') });
+    }
 
     const { name, email, password } = req.body;
     db.run(
@@ -73,8 +83,12 @@ app.put('/api/users/:id', (req, res) => {
 
 
 app.put('/api/companies/:id', (req, res) => {
+    const id = req.params.id;
     const { error } = companyValidation(req.body);
-    if (error) return res.status(400).json({ message: error.details[0].message });
+    if (error) {
+        const errorMessages = error.details.map(detail => detail.message);
+        return res.status(400).json({ message: errorMessages.join(', ') });
+    }
 
     const { cegnev, telefon, ceg_email, jelszo, telepules, megye, 
             ceges_szamla, hitelkartya, adoszam, cegjegyzek, helyrajziszam } = req.body;
@@ -175,6 +189,59 @@ app.post('/api/answers', (req, res) => {
         function(err) {
             if (err) return res.status(500).json({ error: err.message });
             res.json({ id: this.lastID, ...req.body });
+        });
+});
+
+
+
+app.delete('/api/users/:id', (req, res) => {
+    const id = req.params.id;
+    db.run('DELETE FROM users WHERE id = ?', id, function(err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'User deleted', changes: this.changes });
+    });
+});
+
+app.put('/api/users/:id', (req, res) => {
+    const id = req.params.id;
+    const { error } = userValidation(req.body);
+    if (error) return res.status(400).json({ message: error.details[0].message });
+
+    const { name, email, password } = req.body;
+    db.run('UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?',
+        [name, email, password, id],
+        function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ id, name, email, changes: this.changes });
+        });
+});
+
+app.delete('/api/companies/:id', (req, res) => {
+    const id = req.params.id;
+    db.run('DELETE FROM companies WHERE id = ?', id, function(err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'Company deleted', changes: this.changes });
+    });
+});
+
+
+
+app.put('/api/companies/:id', (req, res) => {
+    const id = req.params.id;
+    const { error } = companyValidation(req.body);
+    if (error) return res.status(400).json({ message: error.details[0].message });
+
+    const { cegnev, telefon, ceg_email, jelszo, telepules, megye, 
+            ceges_szamla, hitelkartya, adoszam, cegjegyzek, helyrajziszam } = req.body;
+    
+    db.run(`UPDATE companies SET cegnev = ?, telefon = ?, ceg_email = ?, jelszo = ?, 
+            telepules = ?, megye = ?, ceges_szamla = ?, hitelkartya = ?, 
+            adoszam = ?, cegjegyzek = ?, helyrajziszam = ? WHERE id = ?`,
+        [cegnev, telefon, ceg_email, jelszo, telepules, megye, 
+         ceges_szamla, hitelkartya, adoszam, cegjegyzek, helyrajziszam, id],
+        function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ id, ...req.body, changes: this.changes });
         });
 });
 
